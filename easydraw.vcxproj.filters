@@ -21,12 +21,15 @@
     <ClCompile Include="easy_draw.c">
       <Filter>资源文件</Filter>
     </ClCompile>
+    <ClCompile Include="easy_draw_ex.c">
+      <Filter>资源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="easy_draw.h">
       <Filter>资源文件</Filter>
     </ClInclude>
-    <ClInclude Include="easy_draw_config.h">
+    <ClInclude Include="easy_draw_ex.h">
       <Filter>资源文件</Filter>
     </ClInclude>
   </ItemGroup>

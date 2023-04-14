@@ -130,11 +130,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="easy_draw.c" />
+    <ClCompile Include="easy_draw_ex.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="easy_draw.h" />
-    <ClInclude Include="easy_draw_config.h" />
+    <ClInclude Include="easy_draw_ex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

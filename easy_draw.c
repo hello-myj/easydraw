@@ -26,6 +26,37 @@ static easy_draw_driver_t* sg_ed_driver = NULL;
 //	return result;
 //}
 
+static void easy_draw_brush(int16_t x, int16_t y, uint32_t color)
+{
+
+	int8_t brush_half_size_s = 0;
+	int8_t brush_half_size_e = 0;
+	if (sg_ed_brush_size % 2 == 0)
+	{
+		 brush_half_size_s = sg_ed_brush_size / 2-1;
+		 brush_half_size_e = sg_ed_brush_size / 2;
+	}
+	else
+	{
+		brush_half_size_s = sg_ed_brush_size / 2;
+		brush_half_size_e = sg_ed_brush_size / 2;
+	}
+
+
+	for (int i = -brush_half_size_s; i <= brush_half_size_e; i++)
+	{
+		for (int j = -brush_half_size_s; j <= brush_half_size_e; j++)
+		{
+			int16_t xi = x + i;
+			int16_t yj = y + j;
+			if (xi >= 0 && xi < sg_screen_width && yj >= 0 && yj < sg_screen_height)
+			{
+				sg_ed_driver->ed_pixel_draw(xi, yj, color);
+			}
+		}
+	}
+}
+
 
 // 将向量旋转给定角度
 ed_vector_t easy_draw_rotate_vector(ed_vector_t v, uint16_t angle_degrees)
@@ -34,7 +65,8 @@ ed_vector_t easy_draw_rotate_vector(ed_vector_t v, uint16_t angle_degrees)
 	double angle_radians = angle_degrees * ED_PI / 180.0;
 
 	// 应用旋转矩阵
-	ed_vector_t result = {
+	ed_vector_t result = 
+	{
 		.dx = v.dx * cos(angle_radians) - v.dy * sin(angle_radians),
 		.dy = v.dx * sin(angle_radians) + v.dy * cos(angle_radians)
 	};
@@ -76,29 +108,10 @@ ed_point_t easy_draw_rotate_point(ed_point_t point, ed_point_t center, uint16_t 
 	return result;
 }
 
-
-void easy_draw_set_pixel_size(uint8_t size)
+//笔刷建议使用奇数
+void easy_draw_set_brush_size(uint8_t size)
 {
 	sg_ed_brush_size = size;
-}
-
-
-static void easy_draw_brush(int16_t x, int16_t y, uint32_t color)
-{
-	int8_t brush_half_size = sg_ed_brush_size / 2;
-
-	for (int i = -brush_half_size; i <= brush_half_size; i++)
-	{
-		for (int j = -brush_half_size; j <= brush_half_size; j++)
-		{
-			int16_t xi = x + i;
-			int16_t yj = y + j;
-			if (xi >= 0 && xi < sg_screen_width && yj >= 0 && yj < sg_screen_height)
-			{
-				sg_ed_driver->ed_pixel_draw(xi, yj, color);
-			}
-		}
-	}
 }
 
 
@@ -123,6 +136,8 @@ void easy_draw_pixel(int16_t x, int16_t y, uint32_t color)
 
 uint32_t easy_get_pixel(int16_t x, int16_t y)
 {
+	if (ED_IS_DRIVER_NULL(sg_ed_driver, ed_pixel_get))
+		return;
 	return sg_ed_driver->ed_pixel_get(x, y);
 }
 
@@ -284,54 +299,11 @@ void easy_draw_sector(int xc, int yc, int r, int start_angle, int end_angle, uin
 
 
 
-void easy_draw_triangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint32_t color) {
-	easy_draw_line(x1, y1, x2, y2, color);
-	easy_draw_line(x2, y2, x3, y3, color);
-	easy_draw_line(x3, y3, x1, y1, color);
-}
-
-void easy_draw_fillTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint32_t color) {
-	easy_draw_line(x1, y1, x2, y2, color);
-	easy_draw_line(x2, y2, x3, y3, color);
-	easy_draw_line(x3, y3, x1, y1, color);
-
-
-}
-
-
-//扫描线填充算法
-void easy_draw_scanLineFill(int x, int y, uint32_t color)
+void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color)
 {
-
-
-	//int pRight, pLeft;
-	//std::stack<CPoint> stk;
-	//int mColor = pDC->GetPixel(x, y);	//给定种子
-
-	//stk.push(CPoint(x, y));
-	//while (!stk.empty()) {
-
-
-	//	CPoint p = stk.top();	//栈顶像素出栈
-	//	stk.pop();
-
-	//	pRight = SetRP(p.x, p.y, color, mColor, pDC);	//向左向右进行填充
-	//	pLeft = SetLP(p.x, p.y, color, mColor, pDC);
-
-	//	//上下两条扫描线处理
-	//	NewLineSeed(&stk, pLeft, pRight, p.y + 1, color, mColor, pDC);
-	//	NewLineSeed(&stk, pLeft, pRight, p.y - 1, color, mColor, pDC);
-	//}
-}
-// 
-//逐点法多边形绘制
-
-
-
-
-void easy_draw_fill_sector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color)
-{
-
+	easy_draw_line(x0, y0, x1, y1, color);
+	easy_draw_line(x1, y1, x2, y2, color);
+	easy_draw_line(x2, y2, x0, y0, color);
 }
 
 

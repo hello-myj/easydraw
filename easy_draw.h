@@ -55,6 +55,7 @@ typedef struct
 #define ED_PI 3.141592653589793
 
 #define ED_SWAP(a, b,type) { type temp = a; a = b; b = temp; }
+#define ED_SWAP_INT(a,b)  ED_SWAP((a),(b),int)
 
 //#define ED_SWAP(x, y ,type) \
 //	(y) = (x) + (y); \
@@ -78,17 +79,27 @@ extern "C" {
 
 int  easy_draw_init(easy_draw_driver_t* easy_draw_driver, uint16_t width, uint16_t height);
 void easy_draw_set_brush_size(uint8_t size);
+
 void easy_draw_pixel(int16_t x, int16_t y, uint32_t color);
 void easy_draw_line(int16_t x_start, int16_t y_start, int16_t x_end, int16_t y_end, uint32_t color);
 void easy_draw_vertical_line(int16_t x, int16_t y, uint16_t h, uint32_t color);
 void easy_draw_horizon_line(int16_t x, int16_t y, uint16_t w, uint32_t color);
 void easy_draw_rect(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
 void easy_draw_fillRect(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
+
 void easy_draw_arc(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
 void easy_draw_sector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
-void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color);
+void easy_draw_fillSector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
 
-ed_point_t easy_draw_rotate_point(ed_point_t point, ed_point_t center, uint16_t angle_degrees);
+void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color);
+void easy_draw_fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3);
+
+void easy_draw_polygon(ed_point_t* points, uint16_t num_points, uint32_t color);
+void easy_draw_fillPolygon(ed_point_t* points, uint16_t num_points, uint32_t color);
+
+
+ed_point_t easy_helper_rotate_point(ed_point_t point, ed_point_t center, uint16_t angle_degrees);
+int easy_helper_is_polygon(ed_point_t* points, int num_points);
 
 #ifdef __cplusplus
 }

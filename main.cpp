@@ -1,6 +1,7 @@
 ﻿#include <graphics.h>		// 引用图形库头文件
 #include <conio.h>
 #include "easy_draw.h"
+#include "easy_draw_ex.h"
 #include <stdio.h>
 #include <conio.h>
 #define WIDTH 800
@@ -46,9 +47,7 @@ int main()
 	easy_draw_init(&easy_draw_drver, WIDTH, HEIGHT);
 
 	easy_draw_set_brush_size(1);
-	easy_draw_triangle(10, 100, 200, 400, 400, 300, 1);
-
-	easy_draw_triangle(100, 100, 110, 300, 210, 400, 1);
+	//easy_draw_triangle(10, 100, 200, 400, 400, 300, 1);
 
 	//easy_draw_pixel(100, 100, 1);
 	//
@@ -84,6 +83,7 @@ int main()
 	//	Sleep(10);
 	//}
 
+	easy_draw_fillTriangle(100, 100, 10, 50, 400, 500);
 
 	//for (int i = 0;i < 120;i++)
 	//{
@@ -105,6 +105,7 @@ int main()
 
 
 	//easy_draw_sector(100, 200, 100, 0, 100, 1);
+	//easy_draw_fillSector(100, 100, 50, 30, 120, 1);
 
 	//easy_draw_fill_sector(100, 200, 100, 0, 100, 1);
 	//initgraph(640, 480);	// 创建绘图窗口，大小为 640x480 像素

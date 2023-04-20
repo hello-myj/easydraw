@@ -59,7 +59,7 @@ static void easy_draw_brush(int16_t x, int16_t y, uint32_t color)
 
 
 // 将向量旋转给定角度
-ed_vector_t easy_draw_rotate_vector(ed_vector_t v, uint16_t angle_degrees)
+static ed_vector_t easy_helper_rotate_vector(ed_vector_t v, uint16_t angle_degrees)
 {
 	// 将角度转换为弧度
 	double angle_radians = angle_degrees * ED_PI / 180.0;
@@ -76,7 +76,7 @@ ed_vector_t easy_draw_rotate_vector(ed_vector_t v, uint16_t angle_degrees)
 
 
 // 将点围绕中心点旋转一定角度，并返回新的坐标
-ed_point_t easy_draw_rotate_point(ed_point_t point, ed_point_t center, uint16_t angle_degrees)
+ed_point_t easy_helper_rotate_point(ed_point_t point, ed_point_t center, uint16_t angle_degrees)
 {
 	// 计算方向向量
 	ed_vector_t direction = 
@@ -90,7 +90,7 @@ ed_point_t easy_draw_rotate_point(ed_point_t point, ed_point_t center, uint16_t 
 	//direction = easy_draw_normalize_vector(direction);
 
 	// 将方向向量旋转给定角度
-	ed_vector_t rotated_direction = easy_draw_rotate_vector(direction, angle_degrees);
+	ed_vector_t rotated_direction = easy_helper_rotate_vector(direction, angle_degrees);
 
 	// 将旋转后的方向向量与中心点相加，得到新的坐标点
 	//ed_point_t result =
@@ -184,6 +184,17 @@ void easy_draw_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t col
 		else {
 			intensity = sqrtf((dx * dx + dy * dy) - (err * err)) / sqrtf(dx * dx + dy * dy);
 		}
+
+		//int tmp = sqrtf(dx * dx + dy * dy);
+
+		//if (tmp == 0)
+		//{
+		//	intensity = 1.0f;
+		//}
+		//else
+		//{
+		//	intensity = sqrtf((dx * dx + dy * dy) - (err * err)) / tmp;
+		//}
 		
 		//easy_draw_pixel(x0, y0, color + (int)(255 * intensity) * 0x010101);
 		easy_draw_pixel(x0, y0, color);
@@ -292,11 +303,57 @@ void easy_draw_sector(int xc, int yc, int r, int start_angle, int end_angle, uin
 		// 绘制当前像素点
 		easy_draw_pixel(x, y, color);
 	}
-	// 绘制扇形
+	// 绘制线段
 	easy_draw_line(xc, yc, r * cos(start_radians) + xc, r * sin(start_radians) + yc, color);
 	easy_draw_line(xc, yc, r * cos(end_radians) + xc, r * sin(end_radians) + yc, color);
 }
 
+
+
+
+
+void easy_draw_fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3,uint32_t color) 
+{
+	// 为了方便，我们将三个点按 y 坐标排序
+	if (y1 > y2) { ED_SWAP_INT(y1, y2); ED_SWAP_INT(x1, x2); }
+	if (y1 > y3) { ED_SWAP_INT(y1, y3); ED_SWAP_INT(x1, x3); }
+	if (y2 > y3) { ED_SWAP_INT(y2, y3); ED_SWAP_INT(x2, x3); }
+
+	// 计算斜率，确保没有除以 0 的情况
+	float slope1 = y2 == y1 ? 0 : (float)(x2 - x1) / (y2 - y1);
+	float slope2 = y3 == y1 ? 0 : (float)(x3 - x1) / (y3 - y1);
+	float slope3 = y3 == y2 ? 0 : (float)(x3 - x2) / (y3 - y2);
+
+	// 初始化扫描线
+	int scanlineY = y1;
+	float leftX = x1, rightX = x1;
+
+	// 开始扫描线
+	while (scanlineY <= y3) {
+		// 确定左右端点的 x 坐标
+		if (scanlineY >= y2) {
+			leftX += slope1;
+		}
+		else {
+			leftX += slope2;
+		}
+
+		if (scanlineY >= y3) {
+			rightX += slope2;
+		}
+		else {
+			rightX += slope3;
+		}
+
+		// 填充扫描线
+		for (int x = ceil(leftX); x < floor(rightX); ++x) {
+			easy_draw_pixel(x, scanlineY, color);
+		}
+
+		// 移动到下一行
+		++scanlineY;
+	}
+}
 
 
 void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color)
@@ -305,6 +362,137 @@ void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t 
 	easy_draw_line(x1, y1, x2, y2, color);
 	easy_draw_line(x2, y2, x0, y0, color);
 }
+
+
+/* 判断两条线段是否相交 */
+int easy_helper_is_intersect(ed_point_t a1, ed_point_t a2, ed_point_t b1, ed_point_t b2) 
+{
+	int c1 = (a2.x - a1.x) * (b1.y - a1.y) - (b1.x - a1.x) * (a2.y - a1.y);
+	int c2 = (a2.x - a1.x) * (b2.y - a1.y) - (b2.x - a1.x) * (a2.y - a1.y);
+	int c3 = (b2.x - b1.x) * (a1.y - b1.y) - (a1.x - b1.x) * (b2.y - b1.y);
+	int c4 = (b2.x - b1.x) * (a2.y - b1.y) - (a2.x - b1.x) * (b2.y - b1.y);
+	return (c1 * c2 < 0 && c3 * c4 < 0);
+}
+
+int easy_helper_is_convex_polygon(ed_point_t* points, int num_points) 
+{
+	int i, j, k;
+	int flag = 0;
+	for (i = 0; i < num_points; i++) {
+		j = (i + 1) % num_points;
+		k = (j + 1) % num_points;
+		int cross = (points[j].x - points[i].x) * (points[k].y - points[j].y) - (points[j].y - points[i].y) * (points[k].x - points[j].x);
+		if (i == 0) {
+			flag = cross > 0;
+		}
+		else if (flag != (cross > 0)) {
+			return 0;  /* 存在拐向内部的情况，说明不是凸多边形 */
+		}
+	}
+	return 1;  /* 不存在拐向内部的情况，说明是凸多边形 */
+}
+
+/* 判断坐标点数组是否能够组成一个多边形 */
+int easy_helper_is_polygon(ed_point_t* points, int num_points)
+{
+	int i, j;
+	if (num_points < 3)
+		return 0;  /* 至少需要3个点才能组成多边形 */
+	for (i = 0; i < num_points; i++) {
+		for (j = i + 1; j < num_points; j++) 
+		{
+			/* 判断每条边是否和其他边相交 */
+			if (easy_helper_is_intersect(points[i], points[(i + 1) % num_points], points[j], points[(j + 1) % num_points])) 
+			{
+				return 0;  /* 存在相交的情况，说明无法组成多边形 */
+			}
+		}
+	}
+	return 1;  /* 不存在相交的情况，说明可以组成多边形 */
+}
+
+void easy_draw_polygon(ed_point_t * points, uint16_t num_points,uint32_t color)
+{
+	int i;
+	if (!easy_helper_is_polygon(points, num_points)) 
+		return;
+	for (i = 0; i < num_points; i++) 
+	{
+		easy_draw_line(points[i].x, points[i].y, points[(i + 1) % num_points].x, points[(i + 1) % num_points].y, color);
+	}
+}
+
+void easy_draw_fillPolygon(ed_point_t* points, uint16_t num_points, uint32_t color)
+{
+	if (!easy_helper_is_convex_polygon(points, num_points))
+		return;
+
+	// 找到最小y值
+	int16_t min_y = points[0].y;
+	for (uint16_t i = 1; i < num_points; i++) {
+		if (points[i].y < min_y) {
+			min_y = points[i].y;
+		}
+	}
+
+	// 找到最大y值
+	int16_t max_y = points[0].y;
+	for (uint16_t i = 1; i < num_points; i++) {
+		if (points[i].y > max_y) {
+			max_y = points[i].y;
+		}
+	}
+
+	// 对于每一行扫描线，找到相交的线段并填充
+	for (int16_t y = min_y; y <= max_y; y++) {
+		uint16_t num_intersections = 0;
+		ed_point_t intersections[2];
+
+		// 对于每一条边，找到相交的点
+		for (uint16_t i = 0; i < num_points; i++) {
+			uint16_t j = (i + 1) % num_points;
+
+			int16_t x0 = points[i].x;
+			int16_t y0 = points[i].y;
+			int16_t x1 = points[j].x;
+			int16_t y1 = points[j].y;
+
+			// 如果当前行和边没有交点，跳过
+			if ((y < y0 && y < y1) || (y > y0 && y > y1)) {
+				continue;
+			}
+
+			// 计算交点的x坐标
+			int16_t x = x0 + (int32_t)(x1 - x0) * (int32_t)(y - y0) / (int32_t)(y1 - y0);
+
+			// 将交点加入交点数组中
+			if (num_intersections == 0 || x != intersections[num_intersections - 1].x) {
+				intersections[num_intersections].x = x;
+				intersections[num_intersections].y = y;
+				num_intersections++;
+			}
+		}
+
+		// 对交点进行排序
+		for (uint16_t i = 0; i < num_intersections - 1; i++) {
+			for (uint16_t j = i + 1; j < num_intersections; j++) {
+				if (intersections[i].x > intersections[j].x) {
+					ed_point_t temp = intersections[i];
+					intersections[i] = intersections[j];
+					intersections[j] = temp;
+				}
+			}
+		}
+
+		// 填充每一对相邻的交点之间的区域
+		for (uint16_t i = 0; i < num_intersections - 1; i += 2) {
+			int16_t x0 = intersections[i].x;
+			int16_t x1 = intersections[i + 1].x;
+			easy_draw_line(x0, y, x1, y, color);
+		}
+	}
+}
+
 
 
 

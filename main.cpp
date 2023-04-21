@@ -11,20 +11,23 @@
 	【项目】 - 【属性】 - 【配置属性】 - 【c / c++】 - 【语言】
 	把【c++语言标准】选择为【ISO C++20 标准(/ std:c++20)】
 */
-
-
+DWORD* pMem;
 static int easyx_init()
 {
 	initgraph(WIDTH, HEIGHT);
+
+	pMem = GetImageBuffer();
 	return 0;
 }
 
 static void  easyx_draw_pixel(int16_t x, int16_t y, uint32_t color)
 {
 	if (color == 0)
-		putpixel(x, y, RGB(0, 0, 0));
+		pMem[x + y * WIDTH] = RGB(0, 0, 0);
+		//putpixel(x, y, RGB(0, 0, 0));
 	else
-		putpixel(x, y, RGB(255, 255, 255));
+		//putpixel(x, y, RGB(255, 255, 255));
+		pMem[x + y * WIDTH] = RGB(255, 255, 255);
 }
 
 static uint32_t easyx_pixel_get(int16_t x, int16_t y)
@@ -83,8 +86,19 @@ int main()
 	//	Sleep(10);
 	//}
 
-	easy_draw_fillTriangle(100, 100, 10, 50, 400, 500);
+	//ed_point_t polygon[] = { { 100, 100 }, { 10, 50 }, { 400, 400 },{500,100} ,{600,50} };
 
+	//easy_draw_fillPolygon(polygon,5,0);
+
+	//easy_draw_fillTriangle(100, 10, 10, 50, 400, 400,1);
+
+
+	//void easy_draw_fillSector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color)
+	BeginBatchDraw();
+	easy_draw_fillSector(100, 100, 120, 9, 90, 1);
+	easy_draw_fillSector(100,100,100,10,90,0);
+
+	EndBatchDraw();
 	//for (int i = 0;i < 120;i++)
 	//{
 	//	ed_point_t c = { 200+400,300 };

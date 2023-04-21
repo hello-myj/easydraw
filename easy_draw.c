@@ -278,13 +278,50 @@ void easy_draw_arc(int xc, int yc, int r, int start_angle, int end_angle, uint32
 
 void easy_draw_sector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color)
 {
-	if (ED_IS_DRIVER_NULL(sg_ed_driver, ed_sector_draw) == false)
-	{
-		sg_ed_driver->ed_sector_draw(xc, yc, r, start_angle, end_angle, color);
-	}
 
 	int x, y, d;
 	float radians, start_radians, end_radians;
+	ed_point_t last_point = { 0 };
+
+	// 将角度转换为弧度
+	start_radians = start_angle * 3.1415926 / 180.0;
+	end_radians = end_angle * 3.1415926 / 180.0;
+
+	// 初始化起始点的坐标
+	x = r * cos(start_radians) + xc;
+	y = r * sin(start_radians) + yc;
+	last_point.x = x;
+	last_point.y = y;
+
+	// 绘制圆弧
+	for (radians = start_radians; radians <= end_radians; radians += 0.1) {
+		// 计算下一个像素点的坐标
+		x = r * cos(radians) + xc;
+		y = r * sin(radians) + yc;
+		//
+		easy_draw_line(last_point.x, last_point.y, x, y, color);
+		last_point.x = x;
+		last_point.y = y;
+		// 绘制当前像素点
+		//easy_draw_pixel(x, y, color);
+	}
+	easy_draw_line(last_point.x, last_point.y, r * cos(end_radians) + xc, r * sin(end_radians) + yc, color);
+
+	// 绘制线段
+	easy_draw_line(xc, yc, r * cos(start_radians) + xc, r * sin(start_radians) + yc, color);
+	easy_draw_line(xc, yc, r * cos(end_radians) + xc, r * sin(end_radians) + yc, color);
+}
+
+//使用三角形填充
+void easy_draw_fillSector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color)
+{
+
+	int x, y, d;
+	float radians, start_radians, end_radians;
+	ed_point_t triangle_points[3] = { 0 }, last_point = {0};
+
+	triangle_points[0].x = xc;
+	triangle_points[0].y = yc;
 
 	// 将角度转换为弧度
 	start_radians = start_angle * 3.1415926 / 180.0;
@@ -294,65 +331,38 @@ void easy_draw_sector(int xc, int yc, int r, int start_angle, int end_angle, uin
 	x = r * cos(start_radians) + xc;
 	y = r * sin(start_radians) + yc;
 
+	last_point.x = x;
+	last_point.y = y;
+
 	// 绘制圆弧
-	for (radians = start_radians; radians <= end_radians; radians += 0.01) {
+	for (radians = start_radians; radians <= end_radians; radians += 0.1) {
 		// 计算下一个像素点的坐标
+		triangle_points[1] = last_point;
+
 		x = r * cos(radians) + xc;
 		y = r * sin(radians) + yc;
+		easy_draw_line(last_point.x, last_point.y, x, y, color);
+		triangle_points[2].x = x;
+		triangle_points[2].y = y;
+
+		last_point = triangle_points[2];
 
 		// 绘制当前像素点
-		easy_draw_pixel(x, y, color);
+		//easy_draw_pixel(x, y, color);
+
+		easy_draw_fillPolygon(triangle_points, 3, color);
+
 	}
+	easy_draw_line(last_point.x, last_point.y, r * cos(end_radians) + xc, r * sin(end_radians) + yc, color);
+	triangle_points[1] = last_point;
+	triangle_points[2].x = r * cos(end_radians) + xc;
+	triangle_points[2].y = r * sin(end_radians) + yc;
+
+	easy_draw_fillPolygon(triangle_points, 3, color);
+
 	// 绘制线段
 	easy_draw_line(xc, yc, r * cos(start_radians) + xc, r * sin(start_radians) + yc, color);
 	easy_draw_line(xc, yc, r * cos(end_radians) + xc, r * sin(end_radians) + yc, color);
-}
-
-
-
-
-
-void easy_draw_fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3,uint32_t color) 
-{
-	// 为了方便，我们将三个点按 y 坐标排序
-	if (y1 > y2) { ED_SWAP_INT(y1, y2); ED_SWAP_INT(x1, x2); }
-	if (y1 > y3) { ED_SWAP_INT(y1, y3); ED_SWAP_INT(x1, x3); }
-	if (y2 > y3) { ED_SWAP_INT(y2, y3); ED_SWAP_INT(x2, x3); }
-
-	// 计算斜率，确保没有除以 0 的情况
-	float slope1 = y2 == y1 ? 0 : (float)(x2 - x1) / (y2 - y1);
-	float slope2 = y3 == y1 ? 0 : (float)(x3 - x1) / (y3 - y1);
-	float slope3 = y3 == y2 ? 0 : (float)(x3 - x2) / (y3 - y2);
-
-	// 初始化扫描线
-	int scanlineY = y1;
-	float leftX = x1, rightX = x1;
-
-	// 开始扫描线
-	while (scanlineY <= y3) {
-		// 确定左右端点的 x 坐标
-		if (scanlineY >= y2) {
-			leftX += slope1;
-		}
-		else {
-			leftX += slope2;
-		}
-
-		if (scanlineY >= y3) {
-			rightX += slope2;
-		}
-		else {
-			rightX += slope3;
-		}
-
-		// 填充扫描线
-		for (int x = ceil(leftX); x < floor(rightX); ++x) {
-			easy_draw_pixel(x, scanlineY, color);
-		}
-
-		// 移动到下一行
-		++scanlineY;
-	}
 }
 
 
@@ -361,6 +371,22 @@ void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t 
 	easy_draw_line(x0, y0, x1, y1, color);
 	easy_draw_line(x1, y1, x2, y2, color);
 	easy_draw_line(x2, y2, x0, y0, color);
+}
+
+void easy_draw_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color)
+{
+	easy_draw_line(x0, y0, x1, y1, color);
+	easy_draw_line(x1, y1, x2, y2, color);
+	easy_draw_line(x2, y2, x0, y0, color);
+	ed_point_t polygon[3] = { 0 };
+	polygon[0].x = x0;
+	polygon[0].y = y0;
+	polygon[1].x = x1;
+	polygon[1].y = y1;
+	polygon[2].x = x2;
+	polygon[2].y = y2;
+
+	easy_draw_fillPolygon(polygon, 3, color);
 }
 
 
@@ -378,19 +404,23 @@ int easy_helper_is_convex_polygon(ed_point_t* points, int num_points)
 {
 	int i, j, k;
 	int flag = 0;
-	for (i = 0; i < num_points; i++) {
+	for (i = 0; i < num_points; i++) 
+	{
 		j = (i + 1) % num_points;
 		k = (j + 1) % num_points;
 		int cross = (points[j].x - points[i].x) * (points[k].y - points[j].y) - (points[j].y - points[i].y) * (points[k].x - points[j].x);
-		if (i == 0) {
+		if (i == 0) 
+		{
 			flag = cross > 0;
 		}
-		else if (flag != (cross > 0)) {
+		else if (flag != (cross > 0))
+		{
 			return 0;  /* 存在拐向内部的情况，说明不是凸多边形 */
 		}
 	}
 	return 1;  /* 不存在拐向内部的情况，说明是凸多边形 */
 }
+
 
 /* 判断坐标点数组是否能够组成一个多边形 */
 int easy_helper_is_polygon(ed_point_t* points, int num_points)
@@ -422,78 +452,86 @@ void easy_draw_polygon(ed_point_t * points, uint16_t num_points,uint32_t color)
 	}
 }
 
-void easy_draw_fillPolygon(ed_point_t* points, uint16_t num_points, uint32_t color)
+
+ed_polygonRect_helper_t easy_helper_ex_getPolygonRect(uint16_t num_points, ed_point_t tar_polygon[])
 {
-	if (!easy_helper_is_convex_polygon(points, num_points))
-		return;
 
-	// 找到最小y值
-	int16_t min_y = points[0].y;
-	for (uint16_t i = 1; i < num_points; i++) {
-		if (points[i].y < min_y) {
-			min_y = points[i].y;
-		}
+
+	ed_polygonRect_helper_t boxRect;
+
+	boxRect.minX = 50000;
+	boxRect.minY = 50000;
+	boxRect.maxX = -50000;
+	boxRect.maxY = -50000;
+
+	for (int i = 0; i < num_points; i++) {
+
+
+		if (tar_polygon[i].x < boxRect.minX) boxRect.minX = tar_polygon[i].x;
+		if (tar_polygon[i].y < boxRect.minY) boxRect.minY = tar_polygon[i].y;
+		if (tar_polygon[i].x > boxRect.maxX) boxRect.maxX = tar_polygon[i].x;
+		if (tar_polygon[i].y > boxRect.maxY) boxRect.maxY = tar_polygon[i].y;
 	}
-
-	// 找到最大y值
-	int16_t max_y = points[0].y;
-	for (uint16_t i = 1; i < num_points; i++) {
-		if (points[i].y > max_y) {
-			max_y = points[i].y;
-		}
-	}
-
-	// 对于每一行扫描线，找到相交的线段并填充
-	for (int16_t y = min_y; y <= max_y; y++) {
-		uint16_t num_intersections = 0;
-		ed_point_t intersections[2];
-
-		// 对于每一条边，找到相交的点
-		for (uint16_t i = 0; i < num_points; i++) {
-			uint16_t j = (i + 1) % num_points;
-
-			int16_t x0 = points[i].x;
-			int16_t y0 = points[i].y;
-			int16_t x1 = points[j].x;
-			int16_t y1 = points[j].y;
-
-			// 如果当前行和边没有交点，跳过
-			if ((y < y0 && y < y1) || (y > y0 && y > y1)) {
-				continue;
-			}
-
-			// 计算交点的x坐标
-			int16_t x = x0 + (int32_t)(x1 - x0) * (int32_t)(y - y0) / (int32_t)(y1 - y0);
-
-			// 将交点加入交点数组中
-			if (num_intersections == 0 || x != intersections[num_intersections - 1].x) {
-				intersections[num_intersections].x = x;
-				intersections[num_intersections].y = y;
-				num_intersections++;
-			}
-		}
-
-		// 对交点进行排序
-		for (uint16_t i = 0; i < num_intersections - 1; i++) {
-			for (uint16_t j = i + 1; j < num_intersections; j++) {
-				if (intersections[i].x > intersections[j].x) {
-					ed_point_t temp = intersections[i];
-					intersections[i] = intersections[j];
-					intersections[j] = temp;
-				}
-			}
-		}
-
-		// 填充每一对相邻的交点之间的区域
-		for (uint16_t i = 0; i < num_intersections - 1; i += 2) {
-			int16_t x0 = intersections[i].x;
-			int16_t x1 = intersections[i + 1].x;
-			easy_draw_line(x0, y, x1, y, color);
-		}
-	}
+	return boxRect;
 }
 
 
+
+bool easy_helper_ex_inPolygon(uint16_t num_points, ed_point_t tar_polygon[], ed_point_t testPoint)
+{
+
+	if (num_points < 3)
+		return false;
+
+	bool  inSide = false;
+	float lineSlope, interSectX;
+	int   i = 0, j = num_points - 1;
+
+	for (i = 0; i < num_points; i++) {
+
+
+		if ((tar_polygon[i].y < testPoint.y && tar_polygon[j].y >= testPoint.y ||
+			tar_polygon[j].y < testPoint.y && tar_polygon[i].y >= testPoint.y) &&
+			(tar_polygon[i].x <= testPoint.x || tar_polygon[j].x <= testPoint.x)) {
+
+
+			if (tar_polygon[j].x != tar_polygon[i].x) {
+
+
+				lineSlope = (float)(tar_polygon[j].y - tar_polygon[i].y) / (tar_polygon[j].x - tar_polygon[i].x);
+				interSectX = (int)(tar_polygon[i].x + (testPoint.y - tar_polygon[i].y) / lineSlope);
+			}
+			else
+				interSectX = tar_polygon[i].x;
+			if (interSectX < testPoint.x)
+				inSide = !inSide;
+		}
+		j = i;
+	}
+
+	return inSide;
+}
+
+
+//逐点法填充 //https://www.codetd.com/article/11761841
+void easy_draw_fillPolygon(ed_point_t* points, uint16_t num_points, uint32_t color)
+{
+
+	ed_polygonRect_helper_t polyRect;
+
+	polyRect = easy_helper_ex_getPolygonRect(num_points, points);
+
+	ed_point_t testPoint;
+	//从最小点到最大点一次判断，如果在该多边形内部，则进行填充
+	for (testPoint.x = polyRect.minX; testPoint.x < polyRect.maxX; testPoint.x++)
+		for (testPoint.y = polyRect.minY; testPoint.y < polyRect.maxY; testPoint.y++) {
+
+
+			if (easy_helper_ex_inPolygon(num_points, points, testPoint))
+				easy_draw_pixel(testPoint.x, testPoint.y, color);
+
+		}
+}
 
 
 

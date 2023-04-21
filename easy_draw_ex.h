@@ -3,12 +3,15 @@
 #include "easy_draw.h"
 #include <stdlib.h>
 
+
+
+
 #ifdef __cplusplus 
 extern "C" {
 #endif
 
 
-	void easy_drawex_fillPolygon(ed_point_t* points, uint16_t num_points, uint32_t color);
+
 #ifdef __cplusplus
 }
 #endif

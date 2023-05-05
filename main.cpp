@@ -11,23 +11,20 @@
 	【项目】 - 【属性】 - 【配置属性】 - 【c / c++】 - 【语言】
 	把【c++语言标准】选择为【ISO C++20 标准(/ std:c++20)】
 */
-DWORD* pMem;
 static int easyx_init()
 {
 	initgraph(WIDTH, HEIGHT);
 
-	pMem = GetImageBuffer();
 	return 0;
 }
 
 static void  easyx_draw_pixel(int16_t x, int16_t y, uint32_t color)
 {
 	if (color == 0)
-		pMem[x + y * WIDTH] = RGB(0, 0, 0);
-		//putpixel(x, y, RGB(0, 0, 0));
+		putpixel(x, y, RGB(0, 0, 0));
 	else
-		//putpixel(x, y, RGB(255, 255, 255));
-		pMem[x + y * WIDTH] = RGB(255, 255, 255);
+		putpixel(x, y, RGB(255, 255, 255));
+
 }
 
 static uint32_t easyx_pixel_get(int16_t x, int16_t y)
@@ -47,58 +44,31 @@ static easy_draw_driver_t easy_draw_drver = {
 
 int main()
 {
+	volatile DWORD start, end, end2;
+
 	easy_draw_init(&easy_draw_drver, WIDTH, HEIGHT);
 
 	easy_draw_set_brush_size(1);
-	//easy_draw_triangle(10, 100, 200, 400, 400, 300, 1);
-
-	//easy_draw_pixel(100, 100, 1);
-	//
-	//easy_draw_set_pixel_size(4);
-	//easy_draw_line(10, 20, 300, 200, 1);
-	//easy_draw_set_pixel_size(2);
-	//easy_draw_line(10,20,300,200,0);
-
-	//easy_draw_set_pixel_size(4);
-	//easy_draw_rect(20, 30, 300, 50, 1);
-
-	//easy_draw_set_pixel_size(2);
-	//easy_draw_rect(20, 30, 300, 50, 0);
-
-	//easy_draw_set_pixel_size(6);
-	//easy_draw_arc(100, 200, 100, 80, 360, 1);
-	//easy_draw_set_pixel_size(4);
-	//easy_draw_arc(100, 200, 100, 0, 10, 0);
-
-
-	//for(int i=0;i<120;i++)
-	//{
-	//	ed_point_t c = { 200,300 };
-	//	ed_point_t result1 = { 0 }, result2 = {0};
-	//	ed_point_t src1 = { 350,300 };
-	//	ed_point_t src2 = { 250,300 };
-
-	//	result1 = easy_draw_rotate_point(src1, c, i * 3);
-	//	result2 =easy_draw_rotate_point(src2, c, i * 3);
-	//	//easy_draw_pixel(result1.x, result1.y,1);
-	//	//easy_draw_pixel(result2.x, result2.y, 1);
-	//	easy_draw_line(result1.x, result1.y, result2.x, result2.y, 1);
-	//	Sleep(10);
-	//}
-
-	//ed_point_t polygon[] = { { 100, 100 }, { 10, 50 }, { 400, 400 },{500,100} ,{600,50} };
-
-	//easy_draw_fillPolygon(polygon,5,0);
-
-	//easy_draw_fillTriangle(100, 10, 10, 50, 400, 400,1);
-
-
-	//void easy_draw_fillSector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color)
+	start = GetTickCount();
 	BeginBatchDraw();
-	easy_draw_fillSector(100, 100, 120, 9, 90, 1);
-	easy_draw_fillSector(100,100,100,10,90,0);
+	easy_draw_fillSector(100, 100, 120, 10, 90, 1);
+	easy_draw_fillSector(100, 100, 100, 9, 90, 0);
+	//fill_sector_with_triangles(100, 100, 120, 9, 90, 1);
+	//easy_draw_fillTriangle(100,100,218,118,99,219,1);
 
+
+	//easy_draw_fillTriangle(0, 0, 240, 0, 240, 240, 1);
+	//easy_draw_triangle(0, 0, 240, 0, 240, 240, 1);
+	end = GetTickCount();
 	EndBatchDraw();
+	end2 = GetTickCount();
+
+
+	printf("%d", end- start);
+
+	printf("%d", end2 - start);
+
+
 	//for (int i = 0;i < 120;i++)
 	//{
 	//	ed_point_t c = { 200+400,300 };

@@ -176,13 +176,25 @@ void easy_draw_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t col
 	int16_t sy = y0 < y1 ? 1 : -1;
 	int16_t err = dx - dy;
 
-	while (x0 != x1 || y0 != y1) {
+	while (x0 != x1 || y0 != y1) 
+	{
 		float intensity;
-		if (dx == 0 && dy == 0) {
+		if (dx == 0 && dy == 0) 
+		{
 			intensity = 1.0f;
 		}
-		else {
-			intensity = sqrtf((dx * dx + dy * dy) - (err * err)) / sqrtf(dx * dx + dy * dy);
+		else 
+		{
+			int16_t tmp = sqrtf(dx * dx + dy * dy);
+			if (tmp == 0)
+			{
+				intensity = 1.0f;
+			}
+			else
+			{
+				intensity = sqrtf((dx * dx + dy * dy) - (err * err)) / tmp;
+			}
+			
 		}
 
 		//int tmp = sqrtf(dx * dx + dy * dy);
@@ -312,57 +324,229 @@ void easy_draw_sector(int xc, int yc, int r, int start_angle, int end_angle, uin
 	easy_draw_line(xc, yc, r * cos(end_radians) + xc, r * sin(end_radians) + yc, color);
 }
 
+
+
+
 //使用三角形填充
-void easy_draw_fillSector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color)
+void easy_draw_fillSector(int16_t xc, int16_t yc, int16_t r, int16_t start_angle, int16_t end_angle, uint32_t color)
 {
 
-	int x, y, d;
+	volatile int16_t  mid_x, mid_y,d, sx,sy,ex,ey;
 	float radians, start_radians, end_radians;
 	ed_point_t triangle_points[3] = { 0 }, last_point = {0};
 
-	triangle_points[0].x = xc;
-	triangle_points[0].y = yc;
 
 	// 将角度转换为弧度
-	start_radians = start_angle * 3.1415926 / 180.0;
-	end_radians = end_angle * 3.1415926 / 180.0;
+	start_radians = start_angle * ED_PI / 180.0;
+	end_radians = end_angle * ED_PI / 180.0;
 
 	// 初始化起始点的坐标
-	x = r * cos(start_radians) + xc;
-	y = r * sin(start_radians) + yc;
+	//x = r * cos(start_radians) + xc;
+	//y = r * sin(start_radians) + yc;
 
-	last_point.x = x;
-	last_point.y = y;
+	sx= r * cos(start_radians) + xc;
+	sy = r * sin(start_radians) + yc;
+
+	ex = r * cos(end_radians) + xc;
+	ey = r * sin(end_radians) + yc;
+
+	triangle_points[0].x = xc;
+	triangle_points[0].y = yc;
+	triangle_points[1].x = sx;
+	triangle_points[1].y = sy;
+	triangle_points[2].x = ex;
+	triangle_points[2].y = ey;
+
+	easy_draw_fillTriangle(
+	triangle_points[0].x, triangle_points[0].y,
+	triangle_points[1].x, triangle_points[1].y,
+	triangle_points[2].x, triangle_points[2].y,
+	color
+);
+	//easy_draw_triangle2(triangle_points, color);
+
+
+
+	//triangle_points[0].x = (triangle_points[1].x + triangle_points[2].x) / 2;
+	//triangle_points[0].y = (triangle_points[1].y + triangle_points[2].y) / 2;
 
 	// 绘制圆弧
-	for (radians = start_radians; radians <= end_radians; radians += 0.1) {
+	for (radians = start_radians; radians <= end_radians; radians += 0.01) {
 		// 计算下一个像素点的坐标
-		triangle_points[1] = last_point;
 
-		x = r * cos(radians) + xc;
-		y = r * sin(radians) + yc;
-		easy_draw_line(last_point.x, last_point.y, x, y, color);
-		triangle_points[2].x = x;
-		triangle_points[2].y = y;
+		triangle_points[2].x = r * cos(radians) + xc;
+		triangle_points[2].y = r * sin(radians) + yc;
 
-		last_point = triangle_points[2];
-
+		easy_draw_line(triangle_points[1].x, triangle_points[1].y, triangle_points[2].x, triangle_points[2].y, color);
+		
 		// 绘制当前像素点
 		//easy_draw_pixel(x, y, color);
 
-		easy_draw_fillPolygon(triangle_points, 3, color);
+		//easy_draw_triangle2(triangle_points, color);
+		easy_draw_fillTriangle(
+			triangle_points[0].x, triangle_points[0].y,
+			triangle_points[1].x, triangle_points[1].y,
+			triangle_points[2].x, triangle_points[2].y,
+			color
+		);
+		triangle_points[1] = triangle_points[2];
 
 	}
-	easy_draw_line(last_point.x, last_point.y, r * cos(end_radians) + xc, r * sin(end_radians) + yc, color);
-	triangle_points[1] = last_point;
-	triangle_points[2].x = r * cos(end_radians) + xc;
-	triangle_points[2].y = r * sin(end_radians) + yc;
 
-	easy_draw_fillPolygon(triangle_points, 3, color);
+	triangle_points[2].x = ex;
+	triangle_points[2].y = ey;
+	easy_draw_line(triangle_points[1].x, triangle_points[1].y, triangle_points[2].x, triangle_points[2].y, color);
+	easy_draw_fillTriangle(
+		triangle_points[0].x, triangle_points[0].y,
+		triangle_points[1].x, triangle_points[1].y,
+		triangle_points[2].x, triangle_points[2].y,
+		color
+	);
+
 
 	// 绘制线段
-	easy_draw_line(xc, yc, r * cos(start_radians) + xc, r * sin(start_radians) + yc, color);
-	easy_draw_line(xc, yc, r * cos(end_radians) + xc, r * sin(end_radians) + yc, color);
+	easy_draw_line(xc, yc, sx, sy, color);
+	easy_draw_line(xc, yc, ex,ey, color);
+}
+
+void easy_draw_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color)
+{
+
+	int16_t a, b, y, last;
+	// Sort coordinates by Y order (y2 >= y1 >= y0)
+	if (y0 > y1)
+	{
+		ED_SWAP_INT(y0, y1); ED_SWAP_INT(x0, x1);
+	}
+	if (y1 > y2)
+	{
+		ED_SWAP_INT(y2, y1); ED_SWAP_INT(x2, x1);
+	}
+	if (y0 > y1)
+	{
+		ED_SWAP_INT(y0, y1); ED_SWAP_INT(x0, x1);
+	}
+
+	if (y0 == y2)
+	{ // Handle awkward all-on-same-line case as its own thing
+		a = b = x0;
+		if (x1 < a)
+		{
+			a = x1;
+		}
+		else if (x1 > b)
+		{
+			b = x1;
+		}
+		if (x2 < a)
+		{
+			a = x2;
+		}
+		else if (x2 > b)
+		{
+			b = x2;
+		}
+		easy_draw_horizon_line(a, y0, b - a + 1, color);
+		return;
+	}
+
+	int16_t dx01 = x1 - x0,
+		dy01 = y1 - y0,
+		dx02 = x2 - x0,
+		dy02 = y2 - y0,
+		dx12 = x2 - x1,
+		dy12 = y2 - y1,
+		sa = 0,
+		sb = 0;
+
+	// For upper part of triangle, find scanline crossings for segments
+	// 0-1 and 0-2.  If y1=y2 (flat-bottomed triangle), the scanline y1
+	// is included here (and second loop will be skipped, avoiding a /0
+	// error there), otherwise scanline y1 is skipped here and handled
+	// in the second loop...which also avoids a /0 error here if y0=y1
+	// (flat-topped triangle).
+	if (y1 == y2)
+	{
+		last = y1;   // Include y1 scanline
+	}
+	else
+	{
+		last = y1 - 1; // Skip it
+	}
+
+
+	for (y = y0; y <= last; y++)
+	{
+		a = x0 + sa / dy01;
+		b = x0 + sb / dy02;
+		sa += dx01;
+		sb += dx02;
+
+		if (a > b)
+		{
+			ED_SWAP_INT(a, b);
+		}
+
+		easy_draw_horizon_line(a, y, b - a + 1, color);
+	}
+
+	// For lower part of triangle, find scanline crossings for segments
+	// 0-2 and 1-2.  This loop is skipped if y1=y2.
+	sa = dx12 * (y - y1);
+	sb = dx02 * (y - y0);
+
+	for (; y <= y2; y++)
+	{
+		a = x1 + sa / dy12;
+		b = x0 + sb / dy02;
+		sa += dx12;
+		sb += dx02;
+
+		if (a > b)
+		{
+			ED_SWAP_INT(a, b);
+		}
+
+		easy_draw_horizon_line(a, y, b - a + 1, color);
+	}
+}
+
+
+void draw_fillTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint32_t color)
+{
+	int16_t i, y, ymax, xmax1, xmax2, temp;
+	float m1, m2;
+	if (y1 > y2) {
+		temp = y1; y1 = y2; y2 = temp;
+		temp = x1; x1 = x2; x2 = temp;
+	}
+	if (y1 > y3) {
+		temp = y1; y1 = y3; y3 = temp;
+		temp = x1; x1 = x3; x3 = temp;
+	}
+	if (y2 > y3) {
+		temp = y2; y2 = y3; y3 = temp;
+		temp = x2; x2 = x3; x3 = temp;
+	}
+	m1 = (float)(x2 - x1) / (y2 - y1);
+	m2 = (float)(x3 - x1) / (y3 - y1);
+	for (y = y1; y <= y3; y++) {
+		if (y < y2) {
+			xmax1 = x1 + (m1 * (y - y1));
+			xmax2 = x1 + (m2 * (y - y1));
+		}
+		else {
+			xmax1 = x2 + (m1 * (y - y2));
+			xmax2 = x3 + (m2 * (y - y3));
+		}
+		if (xmax1 > xmax2) {
+			temp = xmax1; xmax1 = xmax2; xmax2 = temp;
+		}
+		for (i = xmax1; i <= xmax2; i++) {
+			easy_draw_pixel(i, y, color);
+		}
+	}
+
 }
 
 
@@ -373,21 +557,28 @@ void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t 
 	easy_draw_line(x2, y2, x0, y0, color);
 }
 
-void easy_draw_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color)
+void easy_draw_triangle2(ed_point_t* points, uint32_t color)
 {
-	easy_draw_line(x0, y0, x1, y1, color);
-	easy_draw_line(x1, y1, x2, y2, color);
-	easy_draw_line(x2, y2, x0, y0, color);
-	ed_point_t polygon[3] = { 0 };
-	polygon[0].x = x0;
-	polygon[0].y = y0;
-	polygon[1].x = x1;
-	polygon[1].y = y1;
-	polygon[2].x = x2;
-	polygon[2].y = y2;
-
-	easy_draw_fillPolygon(polygon, 3, color);
+	easy_draw_line(points[0].x, points[0].y, points[1].x, points[1].y, color);
+	easy_draw_line(points[1].x, points[1].y, points[2].x, points[2].y, color);
+	easy_draw_line(points[2].x, points[2].y, points[0].x, points[0].y, color);
 }
+
+//void easy_draw_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color)
+//{
+//	easy_draw_line(x0, y0, x1, y1, color);
+//	easy_draw_line(x1, y1, x2, y2, color);
+//	easy_draw_line(x2, y2, x0, y0, color);
+//	ed_point_t polygon[3] = { 0 };
+//	polygon[0].x = x0;
+//	polygon[0].y = y0;
+//	polygon[1].x = x1;
+//	polygon[1].y = y1;
+//	polygon[2].x = x2;
+//	polygon[2].y = y2;
+//
+//	easy_draw_fillPolygon(polygon, 3, color);
+//}
 
 
 /* 判断两条线段是否相交 */

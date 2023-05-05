@@ -32,6 +32,8 @@ typedef struct
     void     (*ed_pixel_draw)(int16_t x, int16_t y, uint32_t color);
     uint32_t (*ed_pixel_get)(int16_t x, int16_t y);
 
+
+
     void     (*ed_line_draw)(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color);
     void     (*ed_rect_draw)(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
     void     (*ed_rect_fill_draw)(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
@@ -75,8 +77,8 @@ typedef struct
 #define ED_IS_DRIVER_NULL(ptr,member) ( ED_IS_NULL(ptr) || ED_IS_MEMBER_NULL(ptr,member) ? true : false )
 
 
-//#define ED_MAX(x, y) ((x) > (y) ? (x) : (y))
-//#define ED_MIN(x, y) ((x) < (y) ? (x) : (y))
+#define ED_MAX(x, y) ((x) > (y) ? (x) : (y))
+#define ED_MIN(x, y) ((x) < (y) ? (x) : (y))
 
 #ifdef __cplusplus 
 extern "C" { 
@@ -97,10 +99,12 @@ void easy_draw_fillRect(int16_t x, int16_t y, uint16_t width, uint16_t height, u
 
 void easy_draw_arc(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
 void easy_draw_sector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
-void easy_draw_fillSector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
+void easy_draw_fillSector(int16_t xc, int16_t yc, int16_t r, int16_t start_angle, int16_t end_angle, uint32_t color);
 
 void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color);
+void easy_draw_triangle2(ed_point_t* points, uint32_t color);
 void easy_draw_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color);
+
 
 void easy_draw_polygon(ed_point_t* points, uint16_t num_points, uint32_t color);
 void easy_draw_fillPolygon(ed_point_t* points, uint16_t num_points, uint32_t color);
@@ -109,7 +113,7 @@ ed_point_t easy_helper_rotate_point(ed_point_t point, ed_point_t center, uint16_
 int easy_helper_is_polygon(ed_point_t* points, int num_points);
 
 
-
+void fill_sector_with_triangles(int x0, int y0, int r, int start_angle, int end_angle, int color);
 #ifdef __cplusplus
 }
 #endif

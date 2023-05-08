@@ -50,7 +50,7 @@ int main()
 
 	easy_draw_set_brush_size(1);
 	start = GetTickCount();
-	BeginBatchDraw();
+	//BeginBatchDraw();
 	easy_draw_fillSector(100, 100, 120, 10, 90, 1);
 	easy_draw_fillSector(100, 100, 100, 9, 90, 0);
 	//fill_sector_with_triangles(100, 100, 120, 9, 90, 1);
@@ -60,7 +60,7 @@ int main()
 	//easy_draw_fillTriangle(0, 0, 240, 0, 240, 240, 1);
 	//easy_draw_triangle(0, 0, 240, 0, 240, 240, 1);
 	end = GetTickCount();
-	EndBatchDraw();
+	//EndBatchDraw();
 	end2 = GetTickCount();
 
 
@@ -68,6 +68,9 @@ int main()
 
 	printf("%d", end2 - start);
 
+	easy_draw_fillCircle(200, 300, 3,1);
+	//easy_draw_roundedrect(400, 100, 200, 300, 10, 1);
+	easy_draw_fillRoundedRect(400,100,200,300,10,1);
 
 	//for (int i = 0;i < 120;i++)
 	//{

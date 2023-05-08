@@ -34,10 +34,10 @@ typedef struct
 
 
 
-    void     (*ed_line_draw)(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color);
-    void     (*ed_rect_draw)(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
-    void     (*ed_rect_fill_draw)(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
-    void     (*ed_arc_draw)(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
+    //void     (*ed_line_draw)(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color);
+    //void     (*ed_rect_draw)(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
+    //void     (*ed_rect_fill_draw)(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
+    //void     (*ed_arc_draw)(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
 
 } easy_draw_driver_t;
 
@@ -62,15 +62,11 @@ typedef struct
 #define ED_ERROR (-1)
 #define ED_ERR_PARAM_INVAIL (-2)
 
-#define ED_PI 3.141592653589793
+#define ED_PI 3.141592653589793f
 
 #define ED_SWAP(a, b,type) { type temp = a; a = b; b = temp; }
 #define ED_SWAP_INT(a,b)  ED_SWAP((a),(b),int)
 
-//#define ED_SWAP(x, y ,type) \
-//	(y) = (x) + (y); \
-//	(x) = (y) - (x); \
-//	(y) = (y) - (x);
 
 #define ED_IS_NULL(x) ((x) == NULL ? true : false)
 #define ED_IS_MEMBER_NULL(ptr, member) ((ptr)->member == NULL ? true : false)
@@ -96,24 +92,27 @@ void easy_draw_vertical_line(int16_t x, int16_t y, uint16_t h, uint32_t color);
 void easy_draw_horizon_line(int16_t x, int16_t y, uint16_t w, uint32_t color);
 void easy_draw_rect(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
 void easy_draw_fillRect(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color);
+void easy_draw_roundedrect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t r, uint32_t color);
+void easy_draw_fillRoundedRect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t r, uint32_t color);
 
 void easy_draw_arc(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
 void easy_draw_sector(int xc, int yc, int r, int start_angle, int end_angle, uint32_t color);
 void easy_draw_fillSector(int16_t xc, int16_t yc, int16_t r, int16_t start_angle, int16_t end_angle, uint32_t color);
+void easy_draw_circle(int16_t x0, int16_t y0, uint16_t r, uint32_t color);
+void easy_draw_fillCircle(int16_t x0, int16_t y0, uint16_t r, uint32_t color);
 
 void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color);
 void easy_draw_triangle2(ed_point_t* points, uint32_t color);
 void easy_draw_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color);
 
-
 void easy_draw_polygon(ed_point_t* points, uint16_t num_points, uint32_t color);
 void easy_draw_fillPolygon(ed_point_t* points, uint16_t num_points, uint32_t color);
+
+int easy_draw_bitmap(int16_t x, int16_t y, const uint8_t* bitmap, uint16_t w, uint16_t h, uint32_t color);
 
 ed_point_t easy_helper_rotate_point(ed_point_t point, ed_point_t center, uint16_t angle_degrees);
 int easy_helper_is_polygon(ed_point_t* points, int num_points);
 
-
-void fill_sector_with_triangles(int x0, int y0, int r, int start_angle, int end_angle, int color);
 #ifdef __cplusplus
 }
 #endif

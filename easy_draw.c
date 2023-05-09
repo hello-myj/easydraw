@@ -866,15 +866,60 @@ int easy_draw_init(easy_draw_driver_t* easy_draw_driver,uint16_t width, uint16_t
 	return ED_SUCCESS;
 }
 
-int easy_draw_2bit_pic(int16_t x, int16_t y, const uint8_t* picdata, uint8_t w, uint8_t h, uint8_t color)
+
+//列行式扫描
+//int easy_draw_2bit_pic_(int16_t x, int16_t y, const uint8_t* picdata, uint8_t w, uint8_t h)
+//{
+//	int16_t xi, yi, byteWidth = (w + 7) / 8;
+//
+//	
+//
+//	for (xi = 0; xi < w; xi++)
+//	{
+//		for (yi = 0; yi < h; yi++)
+//		{
+//			if (*(picdata + xi * byteWidth + yi / 8) & (128 >> (yi & 7)))
+//			{
+//				easy_draw_pixel(x + xi, y + yi, 1);
+//			}
+//
+//		}
+//	}
+//}
+
+//水平扫描，取模
+int easy_draw_h_2bit_pic_(int16_t x, int16_t y, const uint8_t* picdata, uint8_t w, uint8_t h)
 {
-	int16_t xi, yi, byteWidth = (w + 7) / 8;;
+	int16_t xi, yi, byteWidth = (w + 7) / 8;
 	for (yi = 0; yi < h; yi++)
 	{
 		for (xi = 0; xi < w; xi++)
 		{
-			if (*(picdata + yi * byteWidth + xi / 8) & (128 >> (xi & 7))) {
-				easy_draw_pixel(x + xi, y + yi, color);
+			if (*(picdata + yi * byteWidth + xi / 8) & (0x11>> (xi & 7))) 
+			{
+				easy_draw_pixel(x + xi, y + yi, 1);
+			}
+		}
+	}
+}
+
+
+//垂直扫描，取模
+int easy_draw_v_2bit_pic_(int16_t x, int16_t y, const uint8_t* picdata, uint8_t w, uint8_t h)
+{
+
+}
+
+int easy_draw_2bit_pic(int16_t x, int16_t y, const uint8_t* picdata, uint8_t w, uint8_t h)
+{
+	int16_t xi, yi, byteWidth = (w + 7) / 8;
+	for (yi = 0; yi < h; yi++)
+	{
+		for (xi = 0; xi < w; xi++)
+		{
+			if (*(picdata + yi * byteWidth + xi / 8) &(128 >> (xi & 7)))
+			{
+				easy_draw_pixel(x + xi, y + yi, 1);
 			}
 		}
 	}

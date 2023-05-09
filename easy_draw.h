@@ -108,7 +108,8 @@ void easy_draw_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int1
 void easy_draw_polygon(ed_point_t* points, uint16_t num_points, uint32_t color);
 void easy_draw_fillPolygon(ed_point_t* points, uint16_t num_points, uint32_t color);
 
-int easy_draw_bitmap(int16_t x, int16_t y, const uint8_t* bitmap, uint16_t w, uint16_t h, uint32_t color);
+//int easy_draw_bitmap(int16_t x, int16_t y, const uint8_t* bitmap, uint16_t w, uint16_t h, uint32_t color);
+int easy_draw_2bit_pic(int16_t x, int16_t y, const uint8_t* picdata, uint8_t w, uint8_t h);
 
 ed_point_t easy_helper_rotate_point(ed_point_t point, ed_point_t center, uint16_t angle_degrees);
 int easy_helper_is_polygon(ed_point_t* points, int num_points);

@@ -545,6 +545,204 @@ void easy_draw_fillRoundedRect(int16_t x, int16_t y, uint16_t w, uint16_t h, uin
 }
 
 
+void easy_draw_ellipse2(int16_t x0, int16_t y0, int16_t x1, int16_t y1,uint32_t color)
+{
+	int32_t a = abs(x1 - x0);
+	int32_t b = abs(y1 - y0);	//get diameters
+	int32_t b1 = b & 1;
+	int64_t dx = 4 * (1 - a) * b * b;
+	int64_t dy = 4 * (b1 + 1) * a * a;
+	int64_t err = dx + dy + b1 * a * a;
+	int64_t e2;
+
+	if (x0 > x1) { x0 = x1; x1 += a; }
+	if (y0 > y1) { y0 = y1; }
+	y0 += (b + 1) / 2;
+	y1 = y0 - b1;
+	a *= 8 * a;
+	b1 = 8 * b * b;
+
+	do {
+		easy_draw_pixel(x1, y0, color);
+		easy_draw_pixel(x0, y0, color);
+		easy_draw_pixel(x0, y1, color);
+		easy_draw_pixel(x1, y1, color);
+		e2 = 2 * err;
+		if (e2 >= dx) {
+			x0++;
+			x1--;
+			err += dx += b1;
+		}
+		if (e2 <= dy) {
+			y0++;
+			y1--;
+			err += dy += a;
+		}
+	} while (x0 <= x1);
+
+	while (y0 - y1 < b) 
+	{
+		easy_draw_pixel(x0 - 1, y0,color);
+		easy_draw_pixel(x1 + 1, y0++, color);
+		easy_draw_pixel(x0 - 1, y1, color);
+		easy_draw_pixel(x1 + 1, y1--, color);
+	}
+}
+
+void easy_draw_ellipse(int16_t xCenter, int16_t yCenter, int16_t Rx, int Ry,uint32_t color )
+{
+	int32_t Rx2 = Rx * Rx;
+	int32_t Ry2 = Ry * Ry;
+	int32_t twoRx2 = 2 * Rx2;
+	int32_t twoRy2 = 2 * Ry2;
+	int32_t p;
+	int32_t x = 0;
+	int32_t y = Ry;
+	int32_t px = 0;
+	int32_t py = twoRx2 * y;
+	easy_draw_pixel(xCenter + x, yCenter + y, color);
+	easy_draw_pixel(xCenter - x, yCenter + y, color);
+	easy_draw_pixel(xCenter + x, yCenter - y, color);
+	easy_draw_pixel(xCenter - x, yCenter - y, color);
+	//Region?1
+	p = (int32_t)(Ry2 - Rx2 * Ry + 0.25 * Rx2);
+	while (px < py)
+	{
+		x++;
+		px += twoRy2;
+		if (p < 0)
+			p += Ry2 + px;
+		else
+		{
+			y--;
+			py -= twoRx2;
+			p += Ry2 + px - py;
+		}
+		easy_draw_pixel(xCenter + x, yCenter + y, color);
+		easy_draw_pixel(xCenter - x, yCenter + y, color);
+		easy_draw_pixel(xCenter + x, yCenter - y, color);
+		easy_draw_pixel(xCenter - x, yCenter - y, color);
+	}
+	//Region?2
+	p = (int32_t)(Ry2 * (x + 0.5) * (x + 0.5) + Rx2 * (y - 1) * (y - 1) - Rx2 * Ry2);
+	while (y > 0)
+	{
+		y--;
+		py -= twoRx2;
+		if (p > 0)
+			p += Rx2 - py;
+		else
+		{
+			x++;
+			px += twoRy2;
+			p += Rx2 - py + px;
+		}
+		easy_draw_pixel(xCenter + x, yCenter + y, color);
+		easy_draw_pixel(xCenter - x, yCenter + y, color);
+		easy_draw_pixel(xCenter + x, yCenter - y, color);
+		easy_draw_pixel(xCenter - x, yCenter - y, color);
+	}
+}
+
+void easy_draw_fillEllipse(int16_t xCenter, int16_t yCenter, int16_t rx, int16_t ry,uint32_t color)
+{
+	int32_t x, y;
+	int32_t xchg, ychg;
+	int32_t err;
+	int32_t rxrx2;
+	int32_t ryry2;
+	int32_t stopx, stopy;
+
+	rxrx2 = rx;
+	rxrx2 *= rx;
+	rxrx2 *= 2;
+
+	ryry2 = ry;
+	ryry2 *= ry;
+	ryry2 *= 2;
+
+	x = rx;
+	y = 0;
+
+	xchg = 1;
+	xchg -= rx;
+	xchg -= rx;
+	xchg *= ry;
+	xchg *= ry;
+
+	ychg = rx;
+	ychg *= rx;
+
+	err = 0;
+
+	stopx = ryry2;
+	stopx *= rx;
+	stopy = 0;
+
+	while (stopx >= stopy)
+	{
+
+		easy_draw_vertical_line(xCenter + x, yCenter - y, y + 1,color);
+		easy_draw_vertical_line(xCenter - x, yCenter - y, y + 1, color);
+		easy_draw_vertical_line(xCenter + x, yCenter, y + 1, color);
+		easy_draw_vertical_line(xCenter - x, yCenter, y + 1, color);
+		//draw_filled_ellipse_section(u8g, x, y, x0, y0, option);
+		y++;
+		stopy += rxrx2;
+		err += ychg;
+		ychg += rxrx2;
+		if (2 * err + xchg > 0)
+		{
+			x--;
+			stopx -= ryry2;
+			err += xchg;
+			xchg += ryry2;
+		}
+	}
+
+	x = 0;
+	y = ry;
+
+	xchg = ry;
+	xchg *= ry;
+
+	ychg = 1;
+	ychg -= ry;
+	ychg -= ry;
+	ychg *= rx;
+	ychg *= rx;
+
+	err = 0;
+
+	stopx = 0;
+
+	stopy = rxrx2;
+	stopy *= ry;
+
+
+	while (stopx <= stopy)
+	{
+		easy_draw_vertical_line(xCenter + x, yCenter - y, y + 1,color);
+		easy_draw_vertical_line(xCenter - x, yCenter - y, y + 1, color);
+		easy_draw_vertical_line(xCenter + x, yCenter, y + 1, color);
+		easy_draw_vertical_line(xCenter - x, yCenter, y + 1, color);
+		// u8g_draw_filled_ellipse_section(u8g, x, y, x0, y0, option);
+		x++;
+		stopx += ryry2;
+		err += xchg;
+		xchg += ryry2;
+		if (2 * err + ychg > 0)
+		{
+			y--;
+			stopy -= rxrx2;
+			err += ychg;
+			ychg += rxrx2;
+		}
+	}
+
+}
+
+
 // arduboy
 void easy_draw_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color)
 {

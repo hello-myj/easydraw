@@ -117,6 +117,11 @@ void easy_draw_fillSector(int16_t xc, int16_t yc, int16_t r, int16_t start_angle
 void easy_draw_circle(int16_t x0, int16_t y0, uint16_t r, uint32_t color);
 void easy_draw_fillCircle(int16_t x0, int16_t y0, uint16_t r, uint32_t color);
 
+
+void easy_draw_ellipse(int16_t xCenter, int16_t yCenter, int16_t Rx, int Ry, uint32_t color);
+void easy_draw_ellipse2(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color);
+void easy_draw_fillEllipse(int16_t xCenter, int16_t yCenter, int16_t rx, int16_t ry, uint32_t color);
+
 void easy_draw_triangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color);
 void easy_draw_triangle2(ed_point_t* points, uint32_t color);
 void easy_draw_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color);

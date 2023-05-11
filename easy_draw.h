@@ -9,6 +9,8 @@
 #define ED_TEXT_DRAW_FUNC_ENABLE     1
 #define ED_TEXT_PRINTF_BUFFER        64
 
+#define ED_DRAW_BRUSH_STYLE    0    //0: normal,efficiency   1: fillCircle,low efficiency
+
 typedef struct {
     int16_t x;
     int16_t y;

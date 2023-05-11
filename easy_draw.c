@@ -26,8 +26,59 @@ ed_vector_t easy_draw_normalize_vector(ed_vector_t v)
 	return result;
 }
 
+void easy_helper_brush_vertical_line(int16_t x, int16_t y, uint16_t h, uint32_t color)
+{
+	if (ED_IS_DRIVER_NULL(sg_ed_driver, ed_pixel_draw))
+		return;
+	int16_t end = y + h;
+	for (int a = y; a < end; a++)
+	{
+		if (x >= 0 && x < sg_screen_width && y >= 0 && y < sg_screen_height)
+		{
+			sg_ed_driver->ed_pixel_draw(x, y, color);
+		}
+	}
+}
+
+void easy_helper_brush_fill(int16_t x0, int16_t y0, uint16_t r, uint32_t color)
+{
+	easy_helper_brush_vertical_line(x0, y0 - r, 2 * r + 1, color);
+
+	int16_t f = 1 - r;
+	int16_t ddF_x = 1;
+	int16_t ddF_y = -2 * r;
+	int16_t x = 0;
+	int16_t y = r;
+	int16_t delta = 0;
+
+	while (x < y)
+	{
+		if (f >= 0)
+		{
+			y--;
+			ddF_y += 2;
+			f += ddF_y;
+		}
+
+		x++;
+		ddF_x += 2;
+		f += ddF_x;
+
+		easy_helper_brush_vertical_line(x0 + x, y0 - y, 2 * y + 1 + delta, color);
+		easy_helper_brush_vertical_line(x0 + y, y0 - x, 2 * x + 1 + delta, color);
+		easy_helper_brush_vertical_line(x0 - x, y0 - y, 2 * y + 1 + delta, color);
+		easy_helper_brush_vertical_line(x0 - y, y0 - x, 2 * x + 1 + delta, color);
+		
+	}
+
+}
+
+
+
 static void easy_draw_brush(int16_t x, int16_t y, uint32_t color)
 {
+
+#if ED_DRAW_BRUSH_STYLE==0
 
 	int8_t brush_half_size_s = 0;
 	int8_t brush_half_size_e = 0;
@@ -55,6 +106,13 @@ static void easy_draw_brush(int16_t x, int16_t y, uint32_t color)
 			}
 		}
 	}
+#elif ED_DRAW_BRUSH_STYLE==1
+
+	easy_helper_brush_fill(x, y, sg_ed_brush_size, color);
+
+#endif
+
+
 }
 
 
@@ -150,6 +208,7 @@ void easy_draw_horizon_line(int16_t x, int16_t y, uint16_t w, uint32_t color)
 		easy_draw_pixel(a, y, color);
 	}
 }
+
 
 
 void easy_draw_vertical_line(int16_t x,int16_t y, uint16_t h,uint32_t color)

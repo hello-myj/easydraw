@@ -70,7 +70,7 @@ int main()
 	easy_draw_init(&easy_draw_drver, WIDTH, HEIGHT);
 
 	//easy_draw_fillEllipse(200, 200,100 , 200, 1);
-	easy_draw_set_brush_size(2);
+	easy_draw_set_brush_size(3);
 	// 左耳朵
 	easy_draw_rect(175, 266, 15, 59,0);
 	easy_draw_rect(159, 281, 16, 34,0);
@@ -88,10 +88,13 @@ int main()
 	easy_draw_set_brush_size(1);
 	DrawEllipse(243, 297, 38, 30,-30, 0);
 	DrawEllipse(350, 297, 38, 30,30, 0);
-	easy_draw_set_brush_size(2);
+	easy_draw_set_brush_size(3);
 
 	easy_draw_pixel(243, 297, 0);
 	easy_draw_pixel(350, 297, 0);
+
+
+	easy_draw_fillCircle(100, 100, 5, 0);
 
 	
 	// 

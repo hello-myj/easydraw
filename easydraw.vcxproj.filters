@@ -24,12 +24,27 @@
     <ClCompile Include="easy_draw_ex.c">
       <Filter>资源文件</Filter>
     </ClCompile>
+    <ClCompile Include="easy_menu.c">
+      <Filter>资源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="easy_menu_test.c">
+      <Filter>资源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="easy_button.c">
+      <Filter>资源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="easy_draw.h">
       <Filter>资源文件</Filter>
     </ClInclude>
     <ClInclude Include="easy_draw_ex.h">
+      <Filter>资源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="easy_menu.h">
+      <Filter>资源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="easy_button.h">
       <Filter>资源文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,11 +1,13 @@
 ﻿#include <graphics.h>		// 引用图形库头文件
-#include <conio.h>
 #include "easy_draw.h"
 #include "easy_draw_ex.h"
-#include <stdio.h>
+#include "easy_menu.h"
+//#include <stdio.h>
 #include <conio.h>
-#define WIDTH 800
-#define HEIGHT 480
+#include <iostream>
+
+#define WIDTH  128
+#define HEIGHT 64
 
 /*
 	【项目】 - 【属性】 - 【配置属性】 - 【c / c++】 - 【语言】
@@ -13,9 +15,11 @@
 */
 static int easyx_init()
 {
-	initgraph(WIDTH, HEIGHT);
+	initgraph(WIDTH*4, HEIGHT*4);
 	setbkcolor(WHITE);
 	cleardevice();
+
+	
 
 	return 0;
 }
@@ -24,9 +28,19 @@ static void  easyx_draw_pixel(int16_t x, int16_t y, uint32_t color)
 {
 #if 1
 	if (color == 0)
-		putpixel(x, y, RGB(0, 0, 0));
+	{
+
+		setfillcolor(RGB(0, 0, 0));
+		solidrectangle(4 * x, 4 * y, 4 * x + 3, 4 * y + 3);
+	}
+
 	else
-		putpixel(x, y, RGB(255, 255, 255));
+	{
+		//putpixel(x, y, RGB(255, 255, 255));
+		setfillcolor(RGB(255, 255, 255));
+		solidrectangle(4 * x, 4 * y, 4 * x + 3, 4 * y + 3);
+	}
+		
 #else
 
 	putpixel(x, y, RGB(color*85, color * 85, color * 85));
@@ -44,7 +58,9 @@ static easy_draw_driver_t easy_draw_drver = {
 	.ed_pixel_draw = easyx_draw_pixel,
 };
 
+#if 0
 #include<math.h>
+#include <iostream>
 #define PI acos(-1.0)
 double th = PI / 180;
 
@@ -64,13 +80,13 @@ void DrawEllipse(int x0, int y0, int a, int b, int k, int color)
 	}
 }
 
-#if 1
+
 int main()
 {
 	easy_draw_init(&easy_draw_drver, WIDTH, HEIGHT);
 
 	//easy_draw_fillEllipse(200, 200,100 , 200, 1);
-	easy_draw_set_brush_size(3);
+	easy_draw_set_point_size(3);
 	// 左耳朵
 	easy_draw_rect(175, 266, 15, 59,0);
 	easy_draw_rect(159, 281, 16, 34,0);
@@ -85,10 +101,10 @@ int main()
 	easy_draw_roundedrect(288, 146, 14, 96, 5, 0);
 	//// 绘制左右眼睛
 	// 
-	easy_draw_set_brush_size(1);
+	easy_draw_set_point_size(1);
 	DrawEllipse(243, 297, 38, 30,-30, 0);
 	DrawEllipse(350, 297, 38, 30,30, 0);
-	easy_draw_set_brush_size(3);
+	easy_draw_set_point_size(3);
 
 	easy_draw_pixel(243, 297, 0);
 	easy_draw_pixel(350, 297, 0);
@@ -152,5 +168,19 @@ int main()
 
 #endif
 
+
+
+int main()
+{
+	easy_draw_init(&easy_draw_drver, WIDTH, HEIGHT);
+	easy_draw_info_show();
+	easy_menu_test();
+	//easy_draw_fillCircle(10, 20, 20, 1);
+	//easy_draw_update();
+	//_getch();				// 按任意键继续
+
+	closegraph();
+	return 0;
+}
 
 

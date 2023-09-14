@@ -129,13 +129,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="easy_button.c" />
     <ClCompile Include="easy_draw.c" />
     <ClCompile Include="easy_draw_ex.c" />
+    <ClCompile Include="easy_menu.c" />
+    <ClCompile Include="easy_menu_test.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="easy_button.h" />
     <ClInclude Include="easy_draw.h" />
     <ClInclude Include="easy_draw_ex.h" />
+    <ClInclude Include="easy_menu.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
